@@ -1,0 +1,26 @@
+@charset "utf-8";
+/* CSS Document */
+#tintuc{
+	max-width: 100%;
+	margin: 5px;
+	padding: 5px;
+	display: flex;
+}
+.left{
+	float: left;
+	max-width: 15%;
+	border-right: solid;
+	border-color: darkgray;
+	border-width: 1px;
+	
+}
+.giua{
+	max-width: 45%;
+	margin-left: 5px;
+	margin-right: 5px;
+}
+.right{
+	float: right;
+	max-width: 30%;
+	margin: 5px;
+}
