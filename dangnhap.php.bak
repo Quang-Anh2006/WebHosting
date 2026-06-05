@@ -1,9 +1,8 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) session_start();
+session_start();
 include("connect.php");
 
 $message = "";
-$messageClass = "";
 
 if(isset($_POST['dangnhap']))
 {
@@ -26,9 +25,11 @@ if(isset($_POST['dangnhap']))
         {
             $row = $result->fetch_assoc();
 
+            // Kiểm tra mật khẩu đã mã hóa
             if(password_verify($mk, $row['mk']))
             {
                 $_SESSION['tentk'] = $row['tentk'];
+
                 header("Location: index.php");
                 exit();
             }
@@ -43,10 +44,6 @@ if(isset($_POST['dangnhap']))
         }
     }
 }
-
-if($message != "") {
-    $messageClass = strpos($message, 'thành công') !== false ? 'success' : 'error';
-}
 ?>
 
 <!DOCTYPE html>
@@ -54,10 +51,8 @@ if($message != "") {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Đăng Nhập - QuangAnh Shop</title>
-<link rel="stylesheet" type="text/css" href="CSS/header.css">
-<link rel="stylesheet" type="text/css" href="CSS/style.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<title>Đăng Nhập Hệ Thống</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <style>
 * {
@@ -168,12 +163,6 @@ body {
     line-height: 1.5;
 }
 
-.message.success {
-    background: #d1fae5;
-    color: #047857;
-    border: 1px solid rgba(16, 185, 129, 0.18);
-}
-
 .message.error {
     background: #fee2e2;
     color: #b91c1c;
@@ -202,9 +191,9 @@ body {
 <body>
 
 <div class="page-shell">
-    <span class="page-label"><i class="fas fa-sign-in-alt"></i> Đăng nhập</span>
+    <span class="page-label"><i class="fa fa-sign-in"></i> Đăng nhập</span>
     <h1 class="page-title">Chào mừng trở lại</h1>
-    <p class="page-subtitle">Đăng nhập để tiếp tục mua sắm và truy cập ưu đãi tốt nhất.</p>
+    <p class="page-subtitle">Đăng nhập để tiếp tục sử dụng dịch vụ và quản lý sản phẩm của bạn.</p>
 
     <?php
     if($message != "")

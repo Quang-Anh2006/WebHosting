@@ -1,49 +1,54 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) session_start();
 include("connect.php");
 
 $message = "";
-$messageClass = "";
 
-if(isset($_POST['dangnhap']))
+if(isset($_POST['dangky']))
 {
     $tentk = trim($_POST['tentk']);
     $mk = trim($_POST['mk']);
+    $nhaplaimk = trim($_POST['nhaplaimk']);
 
-    if(empty($tentk) || empty($mk))
+    if(empty($tentk) || empty($mk) || empty($nhaplaimk))
     {
         $message = "Vui lòng nhập đầy đủ thông tin!";
     }
+    elseif($mk != $nhaplaimk)
+    {
+        $message = "Mật khẩu nhập lại không khớp!";
+    }
     else
     {
-        $sql = $conn->prepare("SELECT * FROM taikhoan WHERE tentk=?");
-        $sql->bind_param("s", $tentk);
-        $sql->execute();
-
-        $result = $sql->get_result();
+        // Kiểm tra tài khoản đã tồn tại
+        $check = $conn->prepare("SELECT * FROM taikhoan WHERE tentk=?");
+        $check->bind_param("s", $tentk);
+        $check->execute();
+        $result = $check->get_result();
 
         if($result->num_rows > 0)
         {
-            $row = $result->fetch_assoc();
-
-            if(password_verify($mk, $row['mk']))
-            {
-                $_SESSION['tentk'] = $row['tentk'];
-                header("Location: index.php");
-                exit();
-            }
-            else
-            {
-                $message = "Sai mật khẩu!";
-            }
+            $message = "Tên tài khoản đã tồn tại!";
         }
         else
         {
-            $message = "Tài khoản không tồn tại!";
+            // Mã hóa mật khẩu
+            $hash_password = password_hash($mk, PASSWORD_DEFAULT);
+
+            $sql = $conn->prepare("INSERT INTO taikhoan(tentk,mk) VALUES (?,?)");
+            $sql->bind_param("ss", $tentk, $hash_password);
+
+            if($sql->execute())
+            {
+                $message = "Đăng ký thành công!";
+            }
+            else
+            {
+                $message = "Đăng ký thất bại!";
+            }
         }
     }
 }
-
+$messageClass = "";
 if($message != "") {
     $messageClass = strpos($message, 'thành công') !== false ? 'success' : 'error';
 }
@@ -54,10 +59,8 @@ if($message != "") {
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Đăng Nhập - QuangAnh Shop</title>
-<link rel="stylesheet" type="text/css" href="CSS/header.css">
-<link rel="stylesheet" type="text/css" href="CSS/style.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+<title>Đăng Ký Tài Khoản</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
 <style>
 * {
@@ -82,7 +85,7 @@ body {
     width: min(520px, 100%);
     background: #ffffff;
     border-radius: 32px;
-    padding: 42px 36px;
+    padding: 44px 36px;
     border: 1px solid rgba(76, 175, 80, 0.12);
     box-shadow: 0 30px 70px rgba(19, 64, 33, 0.08);
 }
@@ -143,7 +146,7 @@ body {
     box-shadow: 0 0 0 6px rgba(76, 175, 80, 0.08);
 }
 
-.btn-login {
+.btn-register {
     width: 100%;
     padding: 16px 0;
     border: none;
@@ -156,7 +159,7 @@ body {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.btn-login:hover {
+.btn-register:hover {
     transform: translateY(-1px);
     box-shadow: 0 14px 34px rgba(46, 125, 50, 0.22);
 }
@@ -198,23 +201,20 @@ body {
 }
 </style>
 </head>
-
 <body>
 
 <div class="page-shell">
-    <span class="page-label"><i class="fas fa-sign-in-alt"></i> Đăng nhập</span>
-    <h1 class="page-title">Chào mừng trở lại</h1>
-    <p class="page-subtitle">Đăng nhập để tiếp tục mua sắm và truy cập ưu đãi tốt nhất.</p>
+    <span class="page-label"><i class="fa fa-user-plus"></i> Tạo tài khoản</span>
+    <h1 class="page-title">Đăng ký dễ dàng</h1>
+    <p class="page-subtitle">Hãy tạo tài khoản để bắt đầu mua sắm và truy cập các tính năng đặc biệt của trang.</p>
 
     <?php
-    if($message != "")
-    {
+    if($message != ""){
         echo "<div class='message $messageClass'>$message</div>";
     }
     ?>
 
     <form method="POST" class="form-card">
-
         <div class="input-group">
             <label for="tentk">Tên tài khoản</label>
             <input id="tentk" type="text" name="tentk" placeholder="Nhập tên tài khoản" required>
@@ -225,14 +225,18 @@ body {
             <input id="mk" type="password" name="mk" placeholder="Nhập mật khẩu" required>
         </div>
 
-        <button type="submit" name="dangnhap" class="btn-login">
-            Đăng Nhập
-        </button>
+        <div class="input-group">
+            <label for="nhaplaimk">Nhập lại mật khẩu</label>
+            <input id="nhaplaimk" type="password" name="nhaplaimk" placeholder="Nhập lại mật khẩu" required>
+        </div>
 
+        <button type="submit" name="dangky" class="btn-register">
+            Đăng Ký
+        </button>
     </form>
 
     <div class="footer">
-        Chưa có tài khoản? <a href="dangky.php">Đăng ký ngay</a>
+        Đã có tài khoản? <a href="dangnhap.php">Đăng nhập</a>
     </div>
 </div>
 

@@ -1,4 +1,5 @@
 <?php
+if (session_status() === PHP_SESSION_NONE) session_start();
 include("connect.php");
 
 $message = "";
@@ -48,6 +49,10 @@ if(isset($_POST['dangky']))
         }
     }
 }
+$messageClass = "";
+if($message != "") {
+    $messageClass = strpos($message, 'thành công') !== false ? 'success' : 'error';
+}
 ?>
 
 <!DOCTYPE html>
@@ -56,121 +61,176 @@ if(isset($_POST['dangky']))
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Đăng Ký Tài Khoản</title>
+<link rel="stylesheet" type="text/css" href="CSS/header.css">
+<link rel="stylesheet" type="text/css" href="CSS/style.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
 <style>
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    font-family:'Segoe UI',sans-serif;
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', sans-serif;
 }
 
-body{
-    height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background:linear-gradient(135deg,#0f172a,#1e293b,#334155);
+body {
+    min-height: 100vh;
+    display: grid;
+    place-items: center;
+    padding: 24px;
+    background: radial-gradient(circle at 20% 10%, rgba(76, 175, 80, 0.16), transparent 24%),
+                radial-gradient(circle at 80% 90%, rgba(16, 185, 129, 0.14), transparent 22%),
+                linear-gradient(180deg, #f3faf4 0%, #eaf3ea 100%);
+    color: #1d3c28;
 }
 
-.register-box{
-    width:420px;
-    background:rgba(255,255,255,0.08);
-    backdrop-filter:blur(15px);
-    border:1px solid rgba(255,255,255,0.1);
-    padding:40px;
-    border-radius:20px;
-    box-shadow:0 10px 30px rgba(0,0,0,0.4);
+.page-shell {
+    width: min(520px, 100%);
+    background: #ffffff;
+    border-radius: 32px;
+    padding: 44px 36px;
+    border: 1px solid rgba(76, 175, 80, 0.12);
+    box-shadow: 0 30px 70px rgba(19, 64, 33, 0.08);
 }
 
-.register-box h2{
-    color:#fff;
-    text-align:center;
-    margin-bottom:25px;
+.page-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    background: #4caf50;
+    color: #ffffff;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    letter-spacing: 0.04em;
+    margin-bottom: 16px;
 }
 
-.input-box{
-    margin-bottom:18px;
+.page-title {
+    margin: 0 0 10px;
+    font-size: clamp(2rem, 2.6vw, 2.6rem);
+    color: #16351f;
 }
 
-.input-box label{
-    color:#ddd;
-    display:block;
-    margin-bottom:6px;
-    font-size:14px;
+.page-subtitle {
+    margin: 0 0 32px;
+    color: #546e59;
+    line-height: 1.75;
 }
 
-.input-box input{
-    width:100%;
-    padding:12px;
-    border:none;
-    outline:none;
-    border-radius:10px;
-    background:#f1f5f9;
-    font-size:15px;
+.form-card {
+    display: grid;
+    gap: 18px;
 }
 
-.btn-register{
-    width:100%;
-    padding:13px;
-    border:none;
-    border-radius:10px;
-    background:#3b82f6;
-    color:white;
-    font-size:16px;
-    font-weight:bold;
-    cursor:pointer;
-    transition:0.3s;
+.input-group {
+    display: grid;
+    gap: 10px;
 }
 
-.btn-register:hover{
-    background:#2563eb;
+.input-group label {
+    color: #2a4a32;
+    font-size: 0.95rem;
 }
 
-.message{
-    text-align:center;
-    margin-bottom:15px;
-    color:#22c55e;
-    font-weight:bold;
+.input-group input {
+    width: 100%;
+    padding: 16px 18px;
+    border: 1px solid #dce8dc;
+    outline: none;
+    border-radius: 16px;
+    background: #f6faf7;
+    font-size: 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.footer{
-    text-align:center;
-    margin-top:15px;
-    color:#ddd;
+.input-group input:focus {
+    border-color: #4caf50;
+    box-shadow: 0 0 0 6px rgba(76, 175, 80, 0.08);
 }
 
-.footer a{
-    color:#60a5fa;
-    text-decoration:none;
+.btn-register {
+    width: 100%;
+    padding: 16px 0;
+    border: none;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #4caf50, #2e7d32);
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-register:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 14px 34px rgba(46, 125, 50, 0.22);
+}
+
+.message {
+    padding: 16px 18px;
+    border-radius: 18px;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+.message.success {
+    background: #d1fae5;
+    color: #047857;
+    border: 1px solid rgba(16, 185, 129, 0.18);
+}
+
+.message.error {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid rgba(220, 38, 38, 0.14);
+}
+
+.footer {
+    margin-top: 24px;
+    text-align: center;
+    color: #506b58;
+    font-size: 0.95rem;
+}
+
+.footer a {
+    color: #2e7d32;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.footer a:hover {
+    text-decoration: underline;
 }
 </style>
 </head>
 <body>
 
-<div class="register-box">
-    <h2>Đăng Ký Tài Khoản</h2>
+<div class="page-shell">
+    <span class="page-label"><i class="fas fa-user-plus"></i> Tạo tài khoản</span>
+    <h1 class="page-title">Đăng ký dễ dàng</h1>
+    <p class="page-subtitle">Hãy tạo tài khoản để bắt đầu mua sắm và truy cập các tính năng đặc biệt của trang.</p>
 
     <?php
     if($message != ""){
-        echo "<div class='message'>$message</div>";
+        echo "<div class='message $messageClass'>$message</div>";
     }
     ?>
 
-    <form method="POST">
-        <div class="input-box">
-            <label>Tên tài khoản</label>
-            <input type="text" name="tentk" required>
+    <form method="POST" class="form-card">
+        <div class="input-group">
+            <label for="tentk">Tên tài khoản</label>
+            <input id="tentk" type="text" name="tentk" placeholder="Nhập tên tài khoản" required>
         </div>
 
-        <div class="input-box">
-            <label>Mật khẩu</label>
-            <input type="password" name="mk" required>
+        <div class="input-group">
+            <label for="mk">Mật khẩu</label>
+            <input id="mk" type="password" name="mk" placeholder="Nhập mật khẩu" required>
         </div>
 
-        <div class="input-box">
-            <label>Nhập lại mật khẩu</label>
-            <input type="password" name="nhaplaimk" required>
+        <div class="input-group">
+            <label for="nhaplaimk">Nhập lại mật khẩu</label>
+            <input id="nhaplaimk" type="password" name="nhaplaimk" placeholder="Nhập lại mật khẩu" required>
         </div>
 
         <button type="submit" name="dangky" class="btn-register">
@@ -179,8 +239,7 @@ body{
     </form>
 
     <div class="footer">
-        Đã có tài khoản?
-        <a href="dangnhap.php">Đăng nhập</a>
+        Đã có tài khoản? <a href="dangnhap.php">Đăng nhập</a>
     </div>
 </div>
 
